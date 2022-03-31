@@ -34,18 +34,15 @@
         <a href="#" class="text-center underline text-blue-600" id="download">Download CSV file</a>
       </p>
       <div id="list" class="my-2 p-4 w-full space-y-4"></div>
+      <p class="text-center">
+        <a class="underline text-blue-600" href="mailto:xyz@abc.com">Send Email</a>
+      </p>
     </div>
 
     <script>
       const list = document.querySelector("#list");
       const downloadBTN = document.querySelector("#download");
       let projectName = "";
-
-      function copyToClipboard(e, value) {
-        e.select();
-        document.execCommand("copy");
-        parent.postMessage({ pluginMessage: "Link Coppied" }, "*");
-      }
 
       onmessage = (event) => {
         event.data.pluginMessage.urlList.forEach((obj) => {
@@ -58,8 +55,6 @@
             `;
         });
         projectName = event.data.pluginMessage.projectName;
-
-        ConvertToCSV(JSON.stringify(event.data.pluginMessage));
 
         downloadBTN.addEventListener("click", function () {
           const csv = ConvertToCSV(JSON.stringify(event.data.pluginMessage));
@@ -97,7 +92,12 @@
 
         return str;
       }
+
+      function copyToClipboard(e, value) {
+        e.select();
+        document.execCommand("copy");
+        parent.postMessage({ pluginMessage: "Link Coppied" }, "*");
+      }
     </script>
-    <script src="./script.js"></script>
   </body>
 </html>

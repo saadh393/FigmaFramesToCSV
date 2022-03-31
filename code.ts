@@ -1,21 +1,35 @@
-// This plugin creates 5 rectangles on the screen.
-const numberOfRectangles = 5
+figma.showUI(__html__);
 
-// This file holds the main code for the plugins. It has access to the *document*.
-// You can access browser APIs such as the network by creating a UI which contains
-// a full browser environment (see documentation).
+const FILE_KEY = figma.fileKey;
+const PROJECT_NAME = figma.currentPage.parent.name;
+const urlList = [];
 
-const nodes: SceneNode[] = [];
-for (let i = 0; i < numberOfRectangles; i++) {
-  const rect = figma.createRectangle();
-  rect.x = i * 150;
-  rect.fills = [{type: 'SOLID', color: {r: 1, g: 0.5, b: 0}}];
-  figma.currentPage.appendChild(rect);
-  nodes.push(rect);
-}
-figma.currentPage.selection = nodes;
-figma.viewport.scrollAndZoomIntoView(nodes);
+// Generating Frame URL
+figma.currentPage.children.forEach((page) => {
+  if (page.visible && page.type == "FRAME") {
+    const url = `https://www.figma.com/proto/${FILE_KEY}/${PROJECT_NAME}?page-id=0:1&node-id=${page.id}&scaling=scale-down-width`;
+    urlList.push({
+      name: page.name,
+      url: encodeURI(url),
+      viewport: page.width < 500 ? "Mobile" : "Web",
+    });
+  }
+});
 
-// Make sure to close the plugin when you're done. Otherwise the plugin will
-// keep running, which shows the cancel button at the bottom of the screen.
-figma.closePlugin();
+// Generating Notification for Copied Link
+figma.ui.onmessage = (message) => {
+  figma.notify(message, { timeout: 900 });
+};
+
+// Resing The Window
+figma.ui.resize(600, 400);
+
+// Sending Data from Plugin to UI as Object {URL LIST, PROJECT NAME}
+figma.ui.postMessage({
+  urlList: urlList.sort(function (a, b) {
+    var textA = a.name.toUpperCase();
+    var textB = b.name.toUpperCase();
+    return textA < textB ? -1 : textA > textB ? 1 : 0;
+  }),
+  projectName: PROJECT_NAME,
+});
