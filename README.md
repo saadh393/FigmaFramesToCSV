@@ -14,6 +14,4 @@ This is a beta release of this project. Feel free to contribute and add new feat
 
 ## Contact
 
-Weblywork - [http://weblywork.com/](http://weblywork.com/)
-
 Saad Hasan - [https://saadh393.github.io/](https://saadh393.github.io/)
