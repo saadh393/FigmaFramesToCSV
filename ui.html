@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LinksToSheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        input {
+          @apply border py-4 px-6 w-max;
+        }
+      }
+    </style>
+
+    <style>
+      body {
+        -ms-overflow-style: none; /* for Internet Explorer, Edge */
+        scrollbar-width: none; /* for Firefox */
+        overflow-y: scroll;
+      }
+
+      body::-webkit-scrollbar {
+        display: none; /* for Chrome, Safari, and Opera */
+      }
+    </style>
+    <link rel="stylesheet" href="https://static.figma.com/api/figma-extension-api-0.0.1.css" />
+  </head>
+  <body class="grid place-items-center p-6">
+    <div>
+      <h3 class="text-center font-bold text-2xl text-purple-800">Link to Sheet</h3>
+      <p class="text-center">
+        <a href="#" class="text-center underline text-blue-600" id="download">Download CSV file</a>
+      </p>
+      <div id="list" class="my-2 p-4 w-full space-y-4"></div>
+    </div>
+
+    <script>
+      const list = document.querySelector("#list");
+      const downloadBTN = document.querySelector("#download");
+      let projectName = "";
+
+      function copyToClipboard(e, value) {
+        e.select();
+        document.execCommand("copy");
+        parent.postMessage({ pluginMessage: "Link Coppied" }, "*");
+      }
+
+      onmessage = (event) => {
+        event.data.pluginMessage.urlList.forEach((obj) => {
+          list.innerHTML += `
+            <div class="flex space-x-5">
+                <p class="w-10"> ${obj.viewport} </p>
+                <input type="text" onclick="copyToClipboard(this, '${obj.name}')" value="${obj.name}" />
+                <input type="text" onclick="copyToClipboard(this, '${obj.url}')" value="${obj.url}" />
+            </div>
+            `;
+        });
+        projectName = event.data.pluginMessage.projectName;
+
+        ConvertToCSV(JSON.stringify(event.data.pluginMessage));
+
+        downloadBTN.addEventListener("click", function () {
+          const csv = ConvertToCSV(JSON.stringify(event.data.pluginMessage));
+          downloadCSV(csv);
+        });
+      };
+
+      function downloadCSV(csv) {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        var encodedUri = encodeURI(csvContent + csv);
+        window.open(encodedUri);
+        downloadBTN.setAttribute("href", encodedUri);
+        downloadBTN.setAttribute("download", projectName + ".csv");
+      }
+
+      function ConvertToCSV(objArray) {
+        var array = typeof objArray != "object" ? JSON.parse(objArray) : objArray;
+        var str = "";
+
+        for (var i = 0; i < array.length; i++) {
+          var line = "";
+          for (var index in array[i]) {
+            if (line != "") line += ",";
+            if (index)
+              if (index === "url") {
+                line += `=HYPERLINK("${array[i][index]}";"${array[i]["viewport"]}")`;
+              } else if (index === "viewport") {
+              } else {
+                line += array[i][index];
+              }
+          }
+
+          str += line + "\r\n";
+        }
+
+        return str;
+      }
+    </script>
+    <script src="./script.js"></script>
+  </body>
+</html>
