@@ -1,6 +1,6 @@
 # Links To Sheet
 
-Many cases we need to share the links of frames separately. This plugin will give you a separate list of **visible** frames. Even if there is a way to export the list as CSV file.
+Many cases we need to share the **Figma** links of frames separately. This plugin will give you a separate list of **visible** frames. Even if there is a way to export the list as CSV file.
 
 ## Features
 
