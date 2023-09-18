@@ -1,7 +1,7 @@
 {
   "name": "Figma Frames to CSV",
   "id": "1091265106774177196",
-  "api": "1.0.0",
+  "api": "1.0.1",
   "ui": "ui.html",
   "main": "code.js",
   "enablePrivatePluginApi": true,
