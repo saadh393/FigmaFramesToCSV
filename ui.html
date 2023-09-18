@@ -1,103 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LinksToSheet</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style type="text/tailwindcss">
-      @layer utilities {
-        input {
-          @apply border py-4 px-6 w-max;
-        }
-      }
-    </style>
 
-    <style>
-      body {
-        -ms-overflow-style: none; /* for Internet Explorer, Edge */
-        scrollbar-width: none; /* for Firefox */
-        overflow-y: scroll;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Figma Frames to CSV</title>
 
-      body::-webkit-scrollbar {
-        display: none; /* for Chrome, Safari, and Opera */
-      }
-    </style>
-    <link rel="stylesheet" href="https://static.figma.com/api/figma-extension-api-0.0.1.css" />
-  </head>
-  <body class="grid place-items-center p-6">
-    <div>
-      <h3 class="text-center font-bold text-2xl text-purple-800">Link to Sheet</h3>
-      <p class="text-center">
-        <a href="#" class="text-center underline text-blue-600" id="download">Download CSV file</a>
-      </p>
-      <div id="list" class="my-2 p-4 w-full space-y-4"></div>
-      <p class="text-center">
-        <a class="underline text-blue-600" href="mailto:xyz@abc.com">Send Email</a>
-      </p>
+  <link rel="stylesheet" href="https://static.figma.com/api/figma-extension-api-0.0.1.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      -ms-overflow-style: none;
+      /* for Internet Explorer, Edge */
+      scrollbar-width: none;
+      /* for Firefox */
+      overflow-y: scroll;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
+      /* for Chrome, Safari, and Opera */
+    }
+  </style>
+</head>
+
+<body style="padding: 1.5rem 1rem;">
+  <div>
+    <div class="px-4 flex flex-1 justify-between items-center mt-4">
+      <div>
+        <h1 style="font-size: 1.4rem; font-weight: bold;">Figma Frames to CSV</h1>
+        <p>You can have a list of frames as CSV</p>
+      </div>
+      <a href="#" class="bg-indigo-500 px-4 py-2 text-white rounded-md" id="download"> Download CSV file </a>
     </div>
 
-    <script>
-      const list = document.querySelector("#list");
-      const downloadBTN = document.querySelector("#download");
-      let projectName = "";
+    <!-- Render -->
+    <div id="list" class="my-2 p-4 w-full space-y-4"></div>
 
-      onmessage = (event) => {
-        event.data.pluginMessage.urlList.forEach((obj) => {
-          list.innerHTML += `
+
+    <p class="text-center">
+      Developed by <a href="https://github.com/saadh393">Saad Hasan</a>
+    </p>
+  </div>
+
+  <script>
+    const list = document.querySelector("#list");
+    const downloadBTN = document.querySelector("#download");
+    let projectName = "";
+
+    onmessage = (event) => {
+      event.data.pluginMessage.urlList.forEach((obj) => {
+        list.innerHTML += `
             <div class="flex space-x-5">
-                <p class="w-10"> ${obj.viewport} </p>
-                <input type="text" onclick="copyToClipboard(this, '${obj.name}')" value="${obj.name}" />
-                <input type="text" onclick="copyToClipboard(this, '${obj.url}')" value="${obj.url}" />
+              <div class='flex-1'>  
+                <h2 class='font-bold text-sm'>${obj.name} </h2>
+                <p class="text-xs">Probably It's ${obj.viewport} view</p>
+              </div>
+              
+              <div class='flex-1'>
+                <input type="text" class='w-full' onclick="copyToClipboard(this, '${obj.url}')" value="${obj.url}" />
+              </div>
             </div>
             `;
-        });
-        projectName = event.data.pluginMessage.projectName;
+      });
+      projectName = event.data.pluginMessage.projectName;
 
-        downloadBTN.addEventListener("click", function () {
-          const csv = ConvertToCSV(JSON.stringify(event.data.pluginMessage));
-          downloadCSV(csv);
-        });
-      };
+      downloadBTN.addEventListener("click", function () {
+        const csv = arrayToCSV(event.data.pluginMessage);
+        downloadCSV(csv);
+      });
+    };
 
-      function downloadCSV(csv) {
-        let csvContent = "data:text/csv;charset=utf-8,";
-        var encodedUri = encodeURI(csvContent + csv);
-        window.open(encodedUri);
-        downloadBTN.setAttribute("href", encodedUri);
-        downloadBTN.setAttribute("download", projectName + ".csv");
+    function downloadCSV(csv) {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      var encodedUri = encodeURI(csvContent + csv);
+
+      window.open(encodedUri);
+      downloadBTN.setAttribute("href", encodedUri);
+      downloadBTN.setAttribute("download", projectName + ".csv");
+    }
+
+    function arrayToCSV(inputObject) {
+      if (!inputObject.urlList || !Array.isArray(inputObject.urlList) || inputObject.urlList.length === 0) {
+        return ''; // Return an empty string if the input is invalid
       }
 
-      function ConvertToCSV(objArray) {
-        var array = typeof objArray != "object" ? JSON.parse(objArray) : objArray;
-        var str = "";
+      // Create the CSV header row
+      const header = '=UPPER("name"),=UPPER("viewport") ,=UPPER("url")\n';
 
-        for (var i = 0; i < array.length; i++) {
-          var line = "";
-          for (var index in array[i]) {
-            if (line != "") line += ",";
-            if (index)
-              if (index === "url") {
-                line += `=HYPERLINK("${array[i][index]}";"${array[i]["viewport"]}")`;
-              } else if (index === "viewport") {
-              } else {
-                line += array[i][index];
-              }
-          }
+      // Map the urlList array to CSV rows
+      const csvData = inputObject.urlList.map(item => {
+        const { name, viewport, url } = item;
+        // return '=UPPER("' + name + '"), ' + viewport + ',=HYPERLINK("' + url + '")';
+        return `${name}, ${viewport},=HYPERLINK("${url}")`;
+      }).join('\n');
 
-          str += line + "\r\n";
-        }
+      // Combine the header and CSV data
+      const csvString = header + csvData;
 
-        return str;
-      }
+      return csvString;
+    }
 
-      function copyToClipboard(e, value) {
-        e.select();
-        document.execCommand("copy");
-        parent.postMessage({ pluginMessage: "Link Coppied" }, "*");
-      }
-    </script>
-  </body>
+    function copyToClipboard(e, value) {
+      e.select();
+      document.execCommand("copy");
+      parent.postMessage({ pluginMessage: "Link Coppied" }, "*");
+    }
+  </script>
+</body>
+
 </html>

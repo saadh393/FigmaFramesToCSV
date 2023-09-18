@@ -1,4 +1,6 @@
-figma.showUI(__html__);
+figma.showUI(__html__, {
+  height: 500,
+});
 
 const FILE_KEY = figma.fileKey;
 const PROJECT_NAME = figma.currentPage.parent.name;

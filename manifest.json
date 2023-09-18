@@ -4,6 +4,9 @@
   "api": "1.0.0",
   "ui": "ui.html",
   "main": "code.js",
-  "enablePrivatePluginApi": false,
-  "editorType": ["figma"]
+  "enablePrivatePluginApi": true,
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["https://static.figma.com/api/figma-extension-api-0.0.1.css", "https://cdn.tailwindcss.com"]
+  }
 }
